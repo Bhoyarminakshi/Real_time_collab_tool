@@ -3,21 +3,18 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
     return (
-        <div className="container text-center mt-5">
-            <div className="jumbotron bg-light p-5">
-                <h1 className="display-4">Welcome to CollabTool</h1>
-                <p className="lead">
-                    CollabTool is your go-to platform for seamless real-time collaboration. 
-                    Work together on documents, share ideas, and communicate effortlessly with your team.
+        <div className="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+            <div className="card shadow p-5 bg-white w-100" style={{ maxWidth: "700px" }}>
+                <h1 className="display-5 fw-bold mb-4 text-primary">Welcome to CollabTool</h1>
+                <p className="lead mb-3">
+                    Collaborate in real-time with your team on documents, share ideas, and boost productivity!
                 </p>
-                <hr className="my-4" />
-                <p>
-                    Whether you're working on a team project or just need to organize your thoughts, 
-                    CollabTool offers all the features you need to stay productive.
+                <p className="text-muted mb-4">
+                    Whether you are working remotely or in-house, CollabTool empowers your workflow with simple, fast, and effective tools.
                 </p>
-                <div className="mt-4">
-                    <Link to="/register" className="btn btn-primary btn-lg me-3">Register</Link>
-                    <Link to="/login" className="btn btn-secondary btn-lg">Login</Link>
+                <div className="d-flex justify-content-center gap-3">
+                    <Link to="/register" className="btn btn-primary btn-lg px-4">Get Started</Link>
+                    <Link to="/login" className="btn btn-outline-secondary btn-lg px-4">Login</Link>
                 </div>
             </div>
         </div>

@@ -3,11 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getDocumentById, updateDocument, deleteDocument } from '../services/documentService';
 import { io } from 'socket.io-client';
 
-
-
 const DocumentDetails = () => {
     const socket = io('http://localhost:5000');
-
     const { id } = useParams();
     const navigate = useNavigate();
     const [document, setDocument] = useState(null);
@@ -15,9 +12,9 @@ const DocumentDetails = () => {
     const [content, setContent] = useState('');
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
-
     const location = useLocation();
     const message = location.state?.message;
+
     useEffect(() => {
         const fetchDocument = async () => {
             try {
@@ -33,11 +30,8 @@ const DocumentDetails = () => {
     }, [id]);
 
     useEffect(() => {
-        
-        // Join the document room
         socket.emit('joinDocument', id);
 
-        // Listen for real-time updates
         socket.on('receiveUpdate', (updatedData) => {
             if (updatedData.title) {
                 setTitle(updatedData.title);
@@ -48,11 +42,9 @@ const DocumentDetails = () => {
         });
 
         socket.on('receiveUpdatedTitle', (updatedContent) => {
-      
             setContent(updatedContent);
-        
-    });
-        // Cleanup on component unmount
+        });
+
         return () => {
             socket.disconnect();
         };
@@ -68,7 +60,6 @@ const DocumentDetails = () => {
             setError('Failed to update document');
         }
     };
-    
 
     const handleDelete = async () => {
         try {
@@ -79,43 +70,54 @@ const DocumentDetails = () => {
         }
     };
 
-    if (error) return <div className="alert alert-danger">{error}</div>;
-    if (!document) return <div>Loading...</div>;
+    if (error) return <div className="alert alert-danger text-center">{error}</div>;
+    if (!document) return <div className="text-center my-5">Loading...</div>;
 
     return (
-        <div className="container mt-5">
-            {message && <div className="alert alert-success mt-3">{message}</div>}
-            <h2 className="mb-4">Document Details</h2>
-            <div className="form-group">
-                <label htmlFor="title">Title:</label>
+        <div className="container py-5" style={{ maxWidth: "700px" }}>
+            {message && <div className="alert alert-success text-center">{message}</div>}
+
+            <h2 className="mb-4 text-center fw-bold">Edit Document</h2>
+
+            <div className="mb-3">
+                <label htmlFor="title" className="form-label">Title</label>
                 <input
                     type="text"
                     id="title"
                     className="form-control"
                     value={title}
-                    onChange={(e) => {setTitle(e.target.value);
+                    onChange={(e) => {
+                        setTitle(e.target.value);
                         socket.emit('documentUpdate', { documentId: id, title: e.target.value, content });
                     }}
+                    placeholder="Enter document title"
                 />
             </div>
-            <div className="form-group mt-3">
-                <label htmlFor="content">Content:</label>
+
+            <div className="mb-4">
+                <label htmlFor="content" className="form-label">Content</label>
                 <textarea
                     id="content"
                     className="form-control"
-                    rows="5"
+                    rows="6"
                     value={content}
                     onChange={(e) => {
                         setContent(e.target.value);
                         socket.emit('documentUpdate', { documentId: id, title, content: e.target.value });
                     }}
-                />
+                    placeholder="Start writing your content here..."
+                ></textarea>
             </div>
-            {successMessage && <div className="alert alert-success mt-3">{successMessage}</div>}
 
-            <div className="mt-3">
-                <button className="btn btn-primary" onClick={handleUpdate}>Update Document</button>
-                <button className="btn btn-danger ms-2" onClick={handleDelete}>Delete Document</button>
+            {successMessage && <div className="alert alert-success text-center">{successMessage}</div>}
+
+            <div className="d-flex justify-content-between">
+                <button className="btn btn-primary w-50 me-2" onClick={handleUpdate}>
+                    Save Changes
+                </button>
+                <button className="btn btn-outline-danger w-50" onClick={handleDelete}>
+                    Delete Document
+                </button>
             </div>
         </div>
     );
