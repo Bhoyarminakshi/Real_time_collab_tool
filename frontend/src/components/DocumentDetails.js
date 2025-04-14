@@ -3,11 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getDocumentById, updateDocument, deleteDocument } from '../services/documentService';
 import { io } from 'socket.io-client';
 
-
-
 const DocumentDetails = () => {
     const socket = io('http://localhost:5000');
-
     const { id } = useParams();
     const navigate = useNavigate();
     const [document, setDocument] = useState(null);
@@ -18,6 +15,7 @@ const DocumentDetails = () => {
 
     const location = useLocation();
     const message = location.state?.message;
+
     useEffect(() => {
         const fetchDocument = async () => {
             try {
@@ -26,56 +24,63 @@ const DocumentDetails = () => {
                 setTitle(doc.title);
                 setContent(doc.content);
             } catch (error) {
-                setError('Failed to fetch document');
+                console.error("Error fetching document:", error);
+                if (error.response && error.response.status === 401) {
+                    setError('Unauthorized access. Please log in.');
+                    navigate('/login');
+                } else {
+                    setError('Failed to fetch document');
+                }
             }
         };
         fetchDocument();
-    }, [id]);
+    }, [id, navigate]);
 
     useEffect(() => {
-        
-        // Join the document room
         socket.emit('joinDocument', id);
-
-        // Listen for real-time updates
         socket.on('receiveUpdate', (updatedData) => {
-            if (updatedData.title) {
-                setTitle(updatedData.title);
-            }
-            if (updatedData.content) {
-                setContent(updatedData.content);
-            }
+            if (updatedData.title) setTitle(updatedData.title);
+            if (updatedData.content) setContent(updatedData.content);
         });
 
-        socket.on('receiveUpdatedTitle', (updatedContent) => {
-      
-            setContent(updatedContent);
-        
-    });
-        // Cleanup on component unmount
+        socket.on('connect_error', (err) => {
+            console.error('Socket connection error:', err);
+            setError('Failed to connect to real-time updates');
+        });
+
         return () => {
             socket.disconnect();
         };
-    }, [id, socket]);
+    }, [id]);
 
     const handleUpdate = async () => {
         try {
             await updateDocument(id, { title, content });
             socket.emit('documentUpdate', { documentId: id, title, content });
             setSuccessMessage('Document updated successfully!');
-            navigate(`/document/${id}`);
         } catch (error) {
-            setError('Failed to update document');
+            if (error.response && error.response.status === 401) {
+                setError('Unauthorized access. Please log in.');
+                navigate('/login');
+            } else {
+                console.error('Error updating document:', error);
+                setError('Failed to update document');
+            }
         }
     };
-    
 
     const handleDelete = async () => {
         try {
             await deleteDocument(id);
             navigate('/dashboard');
         } catch (error) {
-            setError('Failed to delete document');
+            if (error.response && error.response.status === 401) {
+                setError('Unauthorized access. Please log in.');
+                navigate('/login');
+            } else {
+                console.error('Error deleting document:', error);
+                setError('Failed to delete document');
+            }
         }
     };
 
@@ -93,7 +98,8 @@ const DocumentDetails = () => {
                     id="title"
                     className="form-control"
                     value={title}
-                    onChange={(e) => {setTitle(e.target.value);
+                    onChange={(e) => {
+                        setTitle(e.target.value);
                         socket.emit('documentUpdate', { documentId: id, title: e.target.value, content });
                     }}
                 />

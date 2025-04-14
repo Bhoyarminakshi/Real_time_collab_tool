@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,6 +12,14 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError(''); // Clear any previous errors
+        
+        // Check if token already exists in localStorage
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/dashboard'); // Redirect to dashboard if the token already exists
+            return;
+        }
+
         try {
             const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
             

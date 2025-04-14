@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const DocumentForm = () => {
+    console.log("Form submit triggered");
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const navigate = useNavigate();
@@ -11,9 +13,8 @@ const DocumentForm = () => {
         e.preventDefault();
 
         try {
-            const user = JSON.parse(localStorage.getItem('user'));
-            // Extract the token from the parsed object
-            const token = user ? user.token : null;
+            // Retrieve token from localStorage
+            const token = localStorage.getItem('token');
 
             // Check if the token exists
             if (!token) {
@@ -37,7 +38,7 @@ const DocumentForm = () => {
 
             if (data && data._id) {
                 // If the document has an ID, navigate to the new document page
-                navigate(`/document/${data._id}`, {
+                navigate(`/dashboard`, {
                     state: { message: 'Document created successfully!' },
                 });
             } else {
@@ -45,6 +46,13 @@ const DocumentForm = () => {
             }
         } catch (error) {
             console.error('Failed to create document:', error);
+            if (error.response) {
+                console.error('Response error:', error.response.data);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+            } else {
+                console.error('Error in setting up the request:', error.message);
+            }
         }
     };
 
