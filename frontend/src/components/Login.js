@@ -14,9 +14,14 @@ const Login = () => {
         setError(''); // Clear any previous errors
         try {
             const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+            
+            // Store the token in localStorage
             localStorage.setItem('token', data.token);
-            navigate('/dashboard'); // Redirect to dashboard if login is successful
+
+            // Redirect to dashboard if login is successful
+            navigate('/dashboard'); 
         } catch (error) {
+            // Handle login errors
             if (error.response && error.response.data && error.response.data.message) {
                 setError(error.response.data.message); // Set error message if login fails
             } else {
